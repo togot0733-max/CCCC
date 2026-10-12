@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Naija Cyber Lounge · Comments + Live Chat</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #262626;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      font-size: 14px;
+    }
+
+    .ig-wrap {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       COMMENT ROW
+       ============================================================ */
+    .ig-comment {
+      display: flex;
+      gap: 12px;
+      padding: 8px 16px;
+      align-items: flex-start;
+    }
+
+    .ig-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      object-fit: cover;
+      background: #dbdbdb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .ig-avatar.lg { width: 44px; height: 44px; font-size: 15px; }
+    .ig-avatar.sm { width: 24px; height: 24px; font-size: 10px; }
+
+    .ig-avatar-ring {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      padding: 1.5px;
+      flex-shrink: 0;
+    }
+    .ig-avatar-ring > .ig-avatar {
+      width: 100%;
+      height: 100%;
+      border: 1.5px solid #ffffff;
+    }
+    .ig-avatar-ring.lg { width: 44px; height: 44px; }
+    .ig-avatar-ring.sm { width: 24px; height: 24px; }
+
+    .ig-body { flex: 1; min-width: 0; padding-top: 1px; }
+
+    .ig-username {
+      font-weight: 600;
+      color: #262626;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .ig-username:hover { color: #00376b; }
+
+    .ig-verified {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      vertical-align: -2px;
+      margin-left: 3px;
+      color: #0095f6;
+    }
+
+    .ig-text {
+      color: #262626;
+      line-height: 1.4;
+      display: inline;
+      word-wrap: break-word;
+    }
+
+    .ig-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #8e8e8e;
+      font-weight: 400;
+    }
+    .ig-meta-item {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #8e8e8e;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0;
+      font-family: inherit;
+    }
+    .ig-meta-item:hover { color: #262626; }
+    .ig-meta-item.reply { font-weight: 600; }
+
+    .ig-like-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 6px;
+      flex-shrink: 0;
+      gap: 3px;
+    }
+    .ig-heart {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #8e8e8e;
+      transition: transform 0.15s ease;
+    }
+    .ig-heart:hover { transform: scale(1.1); }
+    .ig-heart.liked { color: #ed4956; }
+    .ig-heart.liked svg { fill: #ed4956; stroke: #ed4956; }
+    .ig-heart svg { width: 12px; height: 12px; }
+
+    .ig-like-count {
+      font-size: 11px;
+      color: #8e8e8e;
+      font-weight: 400;
+    }
+
+    .ig-replies { padding-left: 44px; }
+    .ig-replies .ig-comment { padding: 8px 16px 8px 0; }
+
+    .ig-view-replies {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px 12px 60px;
+      cursor: pointer;
+      color: #8e8e8e;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ig-view-replies::before {
+      content: "";
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: #dbdbdb;
+    }
+
+    /* ATTACHMENTS */
+    .ig-attach {
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #efefef;
+      max-width: 240px;
+      cursor: pointer;
+      background: #fafafa;
+    }
+    .ig-attach img { width: 100%; display: block; }
+    .ig-attach.video { aspect-ratio: 16 / 10; }
+    .ig-attach.video img { height: 100%; object-fit: cover; }
+    .ig-attach-play {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.15);
+    }
+    .ig-attach-play-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #262626;
+    }
+    .ig-attach-tag {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.65);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* AUDIO */
+    .ig-audio {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 6px 12px 6px 6px;
+      background: #efefef;
+      border-radius: 20px;
+      max-width: 220px;
+    }
+    .ig-audio-play {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #262626;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .ig-audio-play.playing { background: #0095f6; }
+    .ig-audio-wave {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 18px;
+      flex: 1;
+    }
+    .ig-audio-wave span {
+      width: 2px;
+      border-radius: 1px;
+      background: #c7c7c7;
+      display: block;
+      transition: background 0.15s ease;
+    }
+    .ig-audio-wave span.played { background: #262626; }
+    .ig-audio-time {
+      font-size: 11px;
+      color: #8e8e8e;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    /* TOP BAR */
+    .ig-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #efefef;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+    .ig-topbar-title { font-size: 15px; font-weight: 600; color: #262626; }
+    .ig-topbar-icon {
+      background: none;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: #262626;
+    }
+
+    /* CAPTION */
+    .ig-caption {
+      display: flex;
+      gap: 12px;
+      padding: 12px 16px 4px;
+      border-bottom: 1px solid #efefef;
+    }
+    .ig-caption-body { flex: 1; font-size: 14px; line-height: 1.5; }
+    .ig-caption-body .ig-username { font-weight: 600; display: inline; }
+    .ig-caption-text { color: #262626; }
+    .ig-caption-time { display: block; margin-top: 6px; font-size: 12px; color: #8e8e8e; }
+
+    /* ============================================================
+       LIVE CHAT PANEL (Minnit official embed)
+       ============================================================ */
+    .ig-chat-panel {
+      padding: 16px;
+      border-top: 1px solid #efefef;
+      border-bottom: 1px solid #efefef;
+      background: #fafafa;
+    }
+    .ig-chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .ig-chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #262626;
+    }
+    .ig-chat-live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ed4956;
+      box-shadow: 0 0 0 3px rgba(237, 73, 86, 0.18);
+      animation: igPulse 2s ease-in-out infinite;
+    }
+    @keyframes igPulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(237, 73, 86, 0.18); }
+      50%      { box-shadow: 0 0 0 8px rgba(237, 73, 86, 0); }
+    }
+    .ig-chat-panel-sub { font-size: 12px; color: #8e8e8e; }
+
+    /* Minnit will inject its iframe here */
+    .minnit-wrap {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #efefef;
+    }
+    .minnit-wrap iframe {
+      border-radius: 12px !important;
+      display: block !important;
+    }
+
+    .ig-chat-powered {
+      font-size: 11px;
+      color: #8e8e8e;
+      text-align: right;
+      margin-top: 8px;
+    }
+    .ig-chat-powered a {
+      color: #0095f6;
+      text-decoration: none;
+    }
+    .ig-chat-powered a:hover { text-decoration: underline; }
+
+    /* LIKED BY */
+    .ig-liked-by {
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #262626;
+      border-top: 1px solid #efefef;
+      border-bottom: 1px solid #efefef;
+    }
+    .ig-liked-by span { font-weight: 400; color: #262626; }
+
+    /* COMPOSER */
+    .ig-composer {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 500px;
+      background: #ffffff;
+      border-top: 1px solid #efefef;
+      z-index: 20;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .ig-composer-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+    }
+    .ig-input {
+      flex: 1;
+      background: #fafafa;
+      border: 1px solid #dbdbdb;
+      border-radius: 22px;
+      padding: 9px 16px;
+      font-size: 14px;
+      color: #262626;
+      outline: none;
+      font-family: inherit;
+    }
+    .ig-input::placeholder { color: #8e8e8e; }
+    .ig-input:focus { border-color: #a8a8a8; }
+
+    .ig-post-btn {
+      background: none;
+      border: none;
+      color: #0095f6;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 2px;
+      flex-shrink: 0;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .ig-post-btn.active { opacity: 1; pointer-events: auto; }
+
+    .ig-tools-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 16px 10px;
+      border-top: 1px solid #efefef;
+    }
+    .ig-tool {
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: #262626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .ig-tool:hover { background: #fafafa; }
+    .ig-tool svg { width: 22px; height: 22px; }
+    .ig-tool-gif {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      border: 1.5px solid #262626;
+      border-radius: 6px;
+      padding: 3px 7px;
+      line-height: 1;
+      min-height: 22px;
+    }
+
+    .ig-recording {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      color: #ed4956;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 16px 8px;
+    }
+    .ig-recording.active { display: flex; }
+    .ig-recording-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ed4956;
+      animation: blink 1s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    .ig-spacer { height: 110px; }
+
+    ::-webkit-scrollbar { width: 0; background: transparent; }
+  </style>
+</head>
+
+<body>
+  <div class="ig-wrap">
+
+    <!-- TOP BAR -->
+    <div class="ig-topbar">
+      <button class="ig-topbar-icon" aria-label="Back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="ig-topbar-title">Comments</div>
+      <button class="ig-topbar-icon" aria-label="More">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5" r="1.6"/>
+          <circle cx="12" cy="12" r="1.6"/>
+          <circle cx="12" cy="19" r="1.6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- POST CAPTION -->
+    <div class="ig-caption">
+      <div class="ig-avatar-ring lg">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #c9b037, #4a5d1f);">MG</div>
+      </div>
+      <div class="ig-caption-body">
+        <span class="ig-username">mama_g_alert</span>
+        <svg class="ig-verified" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1.01-2.52-1.27-3.91-.81C14.67 2.63 13.43 1.75 12 1.75S9.33 2.63 8.66 3.94c-1.39-.46-2.9-.2-3.91.81-1.01 1.01-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91 1.01 1.01 2.52 1.27 3.91.81.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81 1.01-1.01 1.27-2.52.81-3.91 1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+        </svg>
+        <br>
+        <span class="ig-caption-text">Good morning family. Quick reminder: no bank will ever call you to ask for your BVN, PIN, or OTP. If you hear the voice note below, na scammer. Listen am once so you go sabi the voice next time. 🌹</span>
+        <span class="ig-caption-time">2 hours ago</span>
+      </div>
+    </div>
+
+    <!-- LIKED BY -->
+    <div class="ig-liked-by">
+      Liked by <span>tunde_kano</span> and <span>3,417 others</span>
+    </div>
+
+    <!-- ============================================================
+         LIVE CHAT PANEL — Minnit official embed
+         ============================================================ -->
+    <div class="ig-chat-panel">
+      <div class="ig-chat-panel-header">
+        <div class="ig-chat-panel-title">
+          <span class="ig-chat-live-dot"></span>
+          <span>Live Chat</span>
+        </div>
+        <span class="ig-chat-panel-sub">Powered by Minnit</span>
+      </div>
+
+      <!-- Minnit's loader script (only loaded once) -->
+      <script src="https://minnit.chat/js/embed.js?c=1772345192" defer></script>
+
+      <!-- Wrap so we can round the injected iframe -->
+      <div class="minnit-wrap">
+        <!-- Minnit's official placeholder — replaced by an iframe on load -->
+        <span
+          style="display: none;"
+          class="minnit-chat-sembed"
+          data-chatname="https://organizations.minnit.chat/432107620809463/c/Main?embed"
+          data-style="width:100%; height:500px; max-height:90vh;"
+          data-version="1.55">Chat</span>
+      </div>
+
+      <!-- Minnit's required attribution -->
+      <p class="powered-by-minnit ig-chat-powered">
+        <a href="https://minnit.chat" target="_blank" rel="noopener">Add a group chat to your website with Minnit Chat</a>
+      </p>
+    </div>
+
+    <!-- ============================================================
+         COMMENT 1 — with audio voice note
+         ============================================================ -->
+    <div class="ig-comment">
+      <div class="ig-avatar-ring">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #e84a6a, #8b0020);">LC</div>
+      </div>
+      <div class="ig-body">
+        <span class="ig-username">lagos_cyber_plug</span>
+        <svg class="ig-verified" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1.01-2.52-1.27-3.91-.81C14.67 2.63 13.43 1.75 12 1.75S9.33 2.63 8.66 3.94c-1.39-.46-2.9-.2-3.91.81-1.01 1.01-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91 1.01 1.01 2.52 1.27 3.91.81.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81 1.01-1.01 1.27-2.52.81-3.91 1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+        </svg>
+        <span class="ig-text">My brother, this thing real oo. I woke up last week see alert say ₦47,000 don leave my account. Na this SIM swap dem use.</span>
+
+        <div class="ig-audio" data-duration="42">
+          <button class="ig-audio-play" aria-label="Play voice note">
+            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="6 3 20 12 6 21 6 3"/>
+            </svg>
+          </button>
+          <div class="ig-audio-wave">
+            <span style="height: 30%; --i:0"></span>
+            <span style="height: 65%; --i:1"></span>
+            <span style="height: 45%; --i:2"></span>
+            <span style="height: 85%; --i:3"></span>
+            <span style="height: 55%; --i:4"></span>
+            <span style="height: 70%; --i:5"></span>
+            <span style="height: 35%; --i:6"></span>
+            <span style="height: 90%; --i:7"></span>
+            <span style="height: 50%; --i:8"></span>
+            <span style="height: 75%; --i:9"></span>
+            <span style="height: 40%; --i:10"></span>
+            <span style="height: 60%; --i:11"></span>
+            <span style="height: 80%; --i:12"></span>
+            <span style="height: 45%; --i:13"></span>
+            <span style="height: 70%; --i:14"></span>
+          </div>
+          <span class="ig-audio-time">0:42</span>
+        </div>
+
+        <div class="ig-meta">
+          <span>2h</span>
+          <button class="ig-meta-item reply">Reply</button>
+        </div>
+      </div>
+      <div class="ig-like-col">
+        <button class="ig-heart liked" aria-label="Unlike">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <span class="ig-like-count">1.2k</span>
+      </div>
+    </div>
+
+    <!-- COMMENT 2 — video + GIF -->
+    <div class="ig-comment">
+      <div class="ig-avatar-ring">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #6ee7b7, #059669);">TK</div>
+      </div>
+      <div class="ig-body">
+        <span class="ig-username">tunde_kano</span>
+        <span class="ig-text">I recorded this quick video of the exact USSD code wey my bank give me for emergency freeze. Save am for your phone sef. 👇</span>
+
+        <div class="ig-attach video">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80" alt="Video">
+          <div class="ig-attach-play">
+            <div class="ig-attach-play-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6 3 20 12 6 21 6 3"/>
+              </svg>
+            </div>
+          </div>
+          <span class="ig-attach-tag">0:48</span>
+        </div>
+
+        <div class="ig-attach">
+          <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="GIF" loading="lazy">
+          <span class="ig-attach-tag">GIF</span>
+        </div>
+
+        <div class="ig-meta">
+          <span>45m</span>
+          <button class="ig-meta-item reply">Reply</button>
+        </div>
+      </div>
+      <div class="ig-like-col">
+        <button class="ig-heart" aria-label="Like">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <span class="ig-like-count">856</span>
+      </div>
+    </div>
+
+    <div class="ig-view-replies">View all 12 replies</div>
+
+    <!-- NESTED REPLY -->
+    <div class="ig-replies">
+      <div class="ig-comment">
+        <div class="ig-avatar-ring sm">
+          <div class="ig-avatar" style="background: linear-gradient(135deg, #c4b5fd, #7c3aed);">AO</div>
+        </div>
+        <div class="ig-body">
+          <span class="ig-username">ada_obi</span>
+          <span class="ig-text">Thank you so much! I just saved the code. God bless you 🙏</span>
+          <div class="ig-meta">
+            <span>18m</span>
+            <button class="ig-meta-item reply">Reply</button>
+          </div>
+        </div>
+        <div class="ig-like-col">
+          <button class="ig-heart" aria-label="Like">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+          <span class="ig-like-count">124</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMENT 3 — image -->
+    <div class="ig-comment">
+      <div class="ig-avatar-ring">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #d4c453, #6b6320);">MG</div>
+      </div>
+      <div class="ig-body">
+        <span class="ig-username">mama_g_alert</span>
+        <svg class="ig-verified" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91-1.01-1.01-2.52-1.27-3.91-.81C14.67 2.63 13.43 1.75 12 1.75S9.33 2.63 8.66 3.94c-1.39-.46-2.9-.2-3.91.81-1.01 1.01-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91 1.01 1.01 2.52 1.27 3.91.81.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81 1.01-1.01 1.27-2.52.81-3.91 1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+        </svg>
+        <span class="ig-text">Below is a screenshot of a real scam message going around. Save am so you go recognize am next time. 📌</span>
+
+        <div class="ig-attach">
+          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80" alt="Scam screenshot">
+        </div>
+
+        <div class="ig-meta">
+          <span>Just now</span>
+          <button class="ig-meta-item reply">Reply</button>
+        </div>
+      </div>
+      <div class="ig-like-col">
+        <button class="ig-heart" aria-label="Like">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <span class="ig-like-count">3.4k</span>
+      </div>
+    </div>
+
+    <!-- COMMENT 4 -->
+    <div class="ig-comment">
+      <div class="ig-avatar-ring">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #93c5fd, #2563eb);">CB</div>
+      </div>
+      <div class="ig-body">
+        <span class="ig-username">chi_ben</span>
+        <span class="ig-text">Na real talk. My aunty just lost ₦200k last month like that. She no even know how e take happen. Thank God say I see this post. I don lock mine now.</span>
+        <div class="ig-meta">
+          <span>18m</span>
+          <button class="ig-meta-item reply">Reply</button>
+        </div>
+      </div>
+      <div class="ig-like-col">
+        <button class="ig-heart" aria-label="Like">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <span class="ig-like-count">47</span>
+      </div>
+    </div>
+
+    <div class="ig-spacer"></div>
+  </div>
+
+  <!-- COMPOSER -->
+  <div class="ig-composer">
+    <div class="ig-recording" id="recordingBar">
+      <span class="ig-recording-dot"></span>
+      <span>Recording voice note...</span>
+      <span id="recordingTime" style="margin-left:auto;font-variant-numeric:tabular-nums;">0:00</span>
+    </div>
+
+    <div class="ig-composer-row">
+      <div class="ig-avatar-ring" style="width:32px;height:32px;">
+        <div class="ig-avatar" style="background: linear-gradient(135deg, #c9b037, #4a5d1f); font-size:11px;">Y</div>
+      </div>
+      <input type="text" id="commentInput" class="ig-input" placeholder="Add a comment..." autocomplete="off">
+      <button class="ig-post-btn" id="postBtn" type="button">Post</button>
+    </div>
+
+    <div class="ig-tools-row">
+      <button class="ig-tool" title="Attach from gallery" data-action="gallery" aria-label="Attach from gallery">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </button>
+
+      <button class="ig-tool" title="Record voice note" data-action="audio" id="audioTool" aria-label="Record voice note">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+
+      <button class="ig-tool ig-tool-gif" title="Add GIF" data-action="gif" aria-label="Add GIF">GIF</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       INPUT → ENABLE / DISABLE POST BUTTON
+       ============================================================ */
+    const input = document.getElementById('commentInput');
+    const postBtn = document.getElementById('postBtn');
+
+    input.addEventListener('input', function () {
+      postBtn.classList.toggle('active', input.value.trim().length > 0);
+    });
+
+    /* ============================================================
+       HEART TOGGLE
+       ============================================================ */
+    document.querySelectorAll('.ig-heart').forEach(function (heart) {
+      heart.addEventListener('click', function () {
+        heart.classList.toggle('liked');
+      });
+    });
+
+    /* ============================================================
+       AUDIO PLAYER (demo)
+       ============================================================ */
+    document.querySelectorAll('.ig-audio').forEach(function (player) {
+      const btn = player.querySelector('.ig-audio-play');
+      const bars = player.querySelectorAll('.ig-audio-wave span');
+      const timeEl = player.querySelector('.ig-audio-time');
+      const totalDuration = parseInt(player.dataset.duration || '30', 10);
+      let playing = false, elapsed = 0, interval = null;
+
+      function fmt(s) {
+        const m = Math.floor(s / 60);
+        const r = Math.floor(s % 60).toString().padStart(2, '0');
+        return m + ':' + r;
+      }
+      timeEl.textContent = fmt(totalDuration);
+
+      btn.addEventListener('click', function () {
+        if (playing) {
+          clearInterval(interval);
+          playing = false;
+          btn.classList.remove('playing');
+          btn.innerHTML = '<svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>';
+        } else {
+          playing = true;
+          btn.classList.add('playing');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+          interval = setInterval(function () {
+            elapsed += 1;
+            if (elapsed >= totalDuration) {
+              elapsed = 0;
+              clearInterval(interval);
+              playing = false;
+              btn.classList.remove('playing');
+              btn.innerHTML = '<svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>';
+              bars.forEach(function (b) { b.classList.remove('played'); });
+              timeEl.textContent = fmt(totalDuration);
+              return;
+            }
+            timeEl.textContent = fmt(elapsed);
+            const progress = elapsed / totalDuration;
+            const playedCount = Math.floor(progress * bars.length);
+            bars.forEach(function (b, i) { b.classList.toggle('played', i < playedCount); });
+          }, 1000);
+        }
+      });
+    });
+
+    /* ============================================================
+       TOOLS ROW — gallery / audio / gif
+       ============================================================ */
+    const audioTool = document.getElementById('audioTool');
+    const recordingBar = document.getElementById('recordingBar');
+    const recordingTime = document.getElementById('recordingTime');
+    let isRecording = false, recSeconds = 0, recInterval = null;
+
+    function fmtRec(s) {
+      const m = Math.floor(s / 60);
+      const r = Math.floor(s % 60).toString().padStart(2, '0');
+      return m + ':' + r;
+    }
+
+    document.querySelectorAll('.ig-tool').forEach(function (tool) {
+      tool.addEventListener('click', function () {
+        const action = tool.dataset.action;
+
+        if (action === 'audio') {
+          isRecording = !isRecording;
+          if (isRecording) {
+            audioTool.style.background = '#ed4956';
+            audioTool.style.color = '#ffffff';
+            recordingBar.classList.add('active');
+            recSeconds = 0;
+            recordingTime.textContent = '0:00';
+            recInterval = setInterval(function () {
+              recSeconds++;
+              recordingTime.textContent = fmtRec(recSeconds);
+            }, 1000);
+          } else {
+            audioTool.style.background = '';
+            audioTool.style.color = '';
+            recordingBar.classList.remove('active');
+            clearInterval(recInterval);
+          }
+        } else if (action === 'gallery') {
+          input.value = '📷 Image attached';
+          input.dispatchEvent(new Event('input'));
+        } else if (action === 'gif') {
+          input.value = '👾 GIF selected';
+          input.dispatchEvent(new Event('input'));
+        }
+      });
+    });
+
+    /* ============================================================
+       POST (demo only)
+       ============================================================ */
+    postBtn.addEventListener('click', function () {
+      if (postBtn.classList.contains('active')) {
+        const text = input.value.trim();
+        if (text) {
+          input.value = '';
+          postBtn.classList.remove('active');
+          alert('Comment posted: "' + text + '"');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
